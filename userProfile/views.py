@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
-from .serializers import UserSerializer, IssueTokenRequestSerializer, TokenSerializer
+from .serializers import UserSerializer, IssueTokenRequestSerializer, TokenSerializer, RegisterSerializer
 
 from .services import UserDAL
 
@@ -40,4 +40,15 @@ def issue_token(request):
         return Response(TokenSerializer(token).data)
     else:
         return Response(serializer.errors, status=400)
-        
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])        
+def user_register(request):
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.create(serializer.validated_data)
+        if user:
+            token = Token.objects.create(user=user)
+            return Response(TokenSerializer(token).data)
+    return Response(serializer.errors, status=400)
