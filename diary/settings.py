@@ -25,8 +25,10 @@ SECRET_KEY = 'django-insecure-#!*l^!9h1ulgy313n(4el(5gbr+jero!hp8jnc&$*t-b4x*0-b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+# CORS_ALLOWED_ORIGINS = ['http://localhost:8000', 'http://192.168.0.243:3000']
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -38,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'book.apps.BookConfig', 'userProfile.apps.UserprofileConfig',
-    'rest_framework','rest_framework.authtoken'
+    'rest_framework','rest_framework.authtoken', 'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -57,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'diary.urls'

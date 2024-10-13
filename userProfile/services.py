@@ -13,3 +13,10 @@ class UserDAL:
         if user is None:
             raise Exception(f"Found no  user with this username: {username}")
         return user
+    
+    @staticmethod
+    def get_user_by_uuid(uuid: str):
+        user = User.objects.get(id=uuid)
+        if user is None:
+            raise Exception(f"Found no  user with this uuid: {uuid}")
+        return user
