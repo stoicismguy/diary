@@ -4,7 +4,6 @@ import uuid
 from django.utils import timezone
 
 
-# Create your models here.
 
 class UserBook(models.Model):
     book_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -19,9 +18,9 @@ class UserBook(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f'{self.user.username}, {self.title}'
+        return f'{self.user.username}, {self.title}, uuid:{self.book_id}'
 
-
+    
 class BookNote(models.Model):
     note_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     book = models.ForeignKey(UserBook, on_delete=models.CASCADE)
@@ -30,4 +29,4 @@ class BookNote(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f'{self.book.user.username} {self.book.title}'
+        return f'{self.book.user.username} {self.book.title}, uuid:{self.note_id}'
