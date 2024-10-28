@@ -4,7 +4,7 @@ from .models import UserBook, BookNote
 class UserBookSerializer(ModelSerializer):
     class Meta:
         model = UserBook
-        fields = ['book_id', 'title', 'author', 'rating', 'start_date', 'finish_date', 'retelling', 'private']
+        fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private']
         extra_kwargs = {
             'private': {'write_only': True},
             'book_id': {'read_only': False, 'required': False}
@@ -16,13 +16,14 @@ class UserBookSerializer(ModelSerializer):
             title = validated_data['title'],
             author = validated_data['author'],
             rating = validated_data['rating'],
+            pages = validated_data['pages'],
             retelling = validated_data['retelling'],
             start_date = validated_data['start_date'],
             finish_date = validated_data['finish_date'],
             private = validated_data['private']
         )
         book.save()
-        return book  
+        return book
     
     def update(self, instance, validated_data):
         if "book_id" in validated_data.keys():

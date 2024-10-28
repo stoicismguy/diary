@@ -41,24 +41,23 @@ def get_book_notes_view(request, book_uuid):
 def add_book_view(request):
     serializer = UserBookSerializer(instance=request.user, data=request.data)
     if serializer.is_valid():
-        # book = serializer.create(request, serializer.validated_data)
         try:
             book = serializer.save()
             return Response({"book": UserBookSerializer(book).data}, status=200)
         except:
-            return Response({"book_id": "Does not exist"})
+            return Response({"error": "get an error"}, status=400)
     return Response(serializer.errors, status=400)
 
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
-def add_book_note(request, book_uuid):
+def add_book_note(request, book_uuid): 
     book = get_book(book_uuid)
     print(request.data)
     serializer = BookNoteSerializer(instance=book, data=request.data, many=True)
     if serializer.is_valid():
         notes = serializer.save()
-        return Response({"succes": "true"}, status=200)
+        return Response({"success": "true"}, status=200)
     else:
         return Response(serializer.errors, status=400)
 

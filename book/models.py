@@ -11,6 +11,7 @@ class UserBook(models.Model):
     title = models.CharField(max_length=120)
     author = models.CharField(max_length=120)
     rating = models.FloatField()
+    pages = models.IntegerField(default=0, null=False)
     start_date = models.DateField(null=False)
     finish_date = models.DateField(null=False)
     retelling = models.TextField()
