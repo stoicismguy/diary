@@ -1,11 +1,13 @@
 from django.db import models
 from book.models import UserBook
 from userProfile.models import User
+import uuid
 # Create your models here.
 
 
 class Collection(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    uuid = models.UUIDField(default=uuid.UUID, editable=False, unique=True)
     title = models.CharField(max_length=120)
     private = models.BooleanField(default=False)
     books = models.ManyToManyField(UserBook)

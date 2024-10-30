@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ProfileView
+from .views import get_all_collections 
 
 urlpatterns = [
-    path('', ProfileView.as_view(), name='bb'),
+    path('user/<slug:username>', get_all_collections, name='all_collections'),
 ]
