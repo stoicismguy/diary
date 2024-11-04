@@ -14,17 +14,13 @@ from .services import UserDAL
 @authentication_classes([TokenAuthentication])
 def user_info(request, username):
     user = UserDAL.get_user_by_username(username)
-    return Response({
-        "user": UserSerializer(user).data
-        })
+    return Response(UserSerializer(user).data)
 
     
 @api_view()
 @authentication_classes([TokenAuthentication])
 def user(request):
-    return Response({
-        'user': UserSerializer(request.user).data
-        })
+    return Response(UserSerializer(request.user).data)
 
 
 @api_view(['POST'])

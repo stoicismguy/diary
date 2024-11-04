@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
-from .services import get_user_collections, get_book_in_collection
+from .services import get_user_collections, get_book_in_collection, get_collection_via_uuid
 from .serializers import CollectionSerializer
 from book.serializers import UserBookSerializer
 
@@ -35,14 +35,24 @@ def get_collection_books(request, collection_uuid):
 def create_collection(request):
     serializer = CollectionSerializer(data=request.data)
     if serializer.is_valid():
-        # try:
-        collection = serializer.create(user=request.user, validated_data=serializer.validated_data)
-        return Response(CollectionSerializer(collection).data, status=201)
-        # except:
-        #     return Response({"detail": "got an unexpected error"}, status=400)
+        try:
+            collection = serializer.create(user=request.user, validated_data=serializer.validated_data)
+            return Response(CollectionSerializer(collection).data, status=201)
+        except:
+            return Response({"detail": "got an unexpected error"}, status=400)
     else:
         return Response(serializer.errors, status=400)
-        
+
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+def delete_collection(request, uuid):
+    collection = get_collection_via_uuid(uuid)
+    if request.user == collection.user:
+        collection.delete()
+        return Response(status=204)
+    return Response({'detail': 'No access to delete it'}, status=403)  
+
 
 
 

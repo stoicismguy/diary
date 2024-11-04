@@ -6,7 +6,7 @@ class UserBookSerializer(ModelSerializer):
         model = UserBook
         fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private']
         extra_kwargs = {
-            'private': {'write_only': True},
+            # 'private': {'write_only': True},
             'book_id': {'read_only': False, 'required': False}
         }
     

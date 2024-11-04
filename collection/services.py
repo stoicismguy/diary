@@ -15,3 +15,8 @@ def get_user_collections(username, private=False):
 def get_book_in_collection(collection_uuid: str)-> tuple:
     collection = Collection.objects.get(uuid=collection_uuid) 
     return (collection, collection.get_books())
+
+
+def get_collection_via_uuid(uuid):
+    collection = Collection.objects.get(uuid=uuid)
+    return collection
