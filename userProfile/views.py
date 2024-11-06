@@ -14,7 +14,8 @@ from .services import UserDAL
 @authentication_classes([TokenAuthentication])
 def user_info(request, username):
     user = UserDAL.get_user_by_username(username)
-    return Response(UserSerializer(user).data)
+    stat = UserDAL.get_stat(user)
+    return Response({"user": UserSerializer(user).data, "statistics": stat})
 
     
 @api_view()

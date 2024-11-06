@@ -36,6 +36,14 @@ def get_book_notes_view(request, book_uuid):
     return Response(BookNoteSerializer(notes, many=True).data)
 
 
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+def get_book_info(request, uuid):
+    book = get_book(uuid)
+    if book.user == request.user:
+        return Response(UserBookSerializer(book).data, status=200)
+    return Response({'detail': 'You have no access'}, status=403)
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 def add_book_view(request):
