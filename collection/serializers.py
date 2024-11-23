@@ -24,7 +24,7 @@ class CollectionSerializer(ModelSerializer):
         fields = ['uuid', 'title', 'private', 'book_count']
         extra_kwargs = {
             'uuid': {'read_only': True},
-            'private': {'write_only': True},
+            # 'private': {'write_only': True}, 
             'book_count': {'read_only': True}
         }
 

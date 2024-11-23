@@ -9,7 +9,7 @@ class Collection(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=120)
     private = models.BooleanField(default=False)
-    books = models.ManyToManyField(UserBook)
+    books = models.ManyToManyField(UserBook, related_name="collections")
 
 
     def __str__(self) -> str:

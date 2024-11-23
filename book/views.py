@@ -11,11 +11,15 @@ from userProfile.services import UserDAL
 from .serializers import UserBookSerializer, BookNoteSerializer
 
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 def get_user_books_view(request, username):
     if str(request.user.username) == username:
         books = get_user_books(request.user, private=True)
+        search_value = request.GET.get("search", None)
+        if search_value is not None:
+            books = books.filter(title__icontains=search_value)
         return Response(UserBookSerializer(books, many=True).data)
     
     book_owner = UserDAL.get_user_by_username(username)
