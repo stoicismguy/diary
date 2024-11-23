@@ -1,7 +1,8 @@
 from .models import User
 from book.models import UserBook
+import calendar
 
-from django.db.models import F, Sum, Count
+from django.db.models import F, Sum, Count, Q
 import datetime
 
 class UserDAL:
@@ -42,4 +43,65 @@ class UserDAL:
             'per_year': per_year,
             'anytime': books.count()
         }
+
+        schedule = []
+
+        current_month = date_now.month
+        months = get_monthes(current_month, date_now.year)
+        for m_index, item in enumerate(months):
+
+            item_month = item[0]
+            item_year = item[1]
+
+            month_info = calendar.monthrange(item_year, item_month)
+
+            start_date = datetime.date(item_year, item_month, 1)
+            finish_date = datetime.date(item_year, item_month, month_info[1])
+
+            query_range = (start_date, finish_date)
+            q_start = Q(start_date__range=query_range)
+            q_finish = Q(finish_date__range=query_range)
+
+            filtered_books = books.filter(q_start | q_finish)
+                
+            active_days = set()
+            # print(filtered_books)
+
+            for book in filtered_books:
+                start = book.start_date
+                finish = book.finish_date
+
+                if finish > finish_date:
+                    finish = month_info[1]
+                    start = start.day
+                elif start < start_date:
+                    start = 1
+                    finish = finish.day
+                else:
+                    start = start.day
+                    finish = finish.day
+
+                for day in range(start, finish + 1):
+                    active_days.add(day)
+
+            schedule.append({
+                'month': m_index,
+                'offset': month_info[0],
+                'days': month_info[1],
+                'active_day': list(active_days)
+            })
+
+        all_times['schedule'] = schedule
+            
         return all_times
+    
+def get_monthes(cur, year):
+    res = []
+    for x in range(5, -1, -1):
+        m = cur - x
+        if m <= 0:
+            res.append((12 + m, year - 1))
+        else:
+            res.append((m, year))
+    return res
+

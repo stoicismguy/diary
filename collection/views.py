@@ -9,6 +9,8 @@ from .services import get_user_collections, get_book_in_collection, get_collecti
 from .serializers import CollectionSerializer
 from book.serializers import UserBookSerializer
 
+from book.services import get_book
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -48,11 +50,55 @@ def create_collection(request):
 @authentication_classes([TokenAuthentication])
 def delete_collection(request, uuid):
     collection = get_collection_via_uuid(uuid)
-    if request.user == collection.user:
-        collection.delete()
-        return Response(status=204)
-    return Response({'detail': 'No access to delete it'}, status=403)  
+    if request.user != collection.user:
+        return Response({'detail': 'No access to delete it'}, status=403)  
+    collection.delete()
+    return Response(status=204)
+    
 
+
+@api_view(["PUT"])
+@authentication_classes([TokenAuthentication])
+def change_collection_privacy(request, uuid):
+    collection = get_collection_via_uuid(uuid)
+    if request.user != collection.user:
+        return Response({'detail': 'No access to change it'}, status=403)  
+    privacy = request.data.get("private", None)
+    if privacy is None:
+        return Response({'detail': "field 'privacy' is required"})
+    collection.private = privacy
+    collection.save()
+    return Response(CollectionSerializer(collection).data, status=200)
+
+    
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+def add_book_to_collection(request, uuid):
+    collection = get_collection_via_uuid(uuid)
+    if request.user != collection.user:
+        return Response({'detail': "No access to add it"}, status=403)
+    book_id = request.data.get("book_id", None)
+    if book_id is None:
+        return Response({'detail': "Could not find a book with this uuid"})
+    book = get_book(book_id)
+    if book.user != request.user:
+        return Response({'detail': "You can change only YOUR books"})
+    
+    collection.books.add(book)
+    collection.save()
+    return Response(UserBookSerializer(book).data, status=200)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+def collection_info(request, uuid):
+    collection = get_collection_via_uuid(uuid)
+    if collection.user != request.user and collection.private:
+        return Response({'detail': "You dont have access to watch it"}, status=403)
+    
+    return Response(CollectionSerializer(collection).data, status=200)
+    
 
 
 

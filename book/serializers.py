@@ -1,13 +1,15 @@
-from rest_framework.serializers import ModelSerializer, ListSerializer
+from rest_framework.serializers import ModelSerializer, ListSerializer, SerializerMethodField
 from .models import UserBook, BookNote
 
 class UserBookSerializer(ModelSerializer):
+    collections = SerializerMethodField('get_collections_f')
     class Meta:
         model = UserBook
-        fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private']
+        fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private', 'collections']
         extra_kwargs = {
             # 'private': {'write_only': True},
-            'book_id': {'read_only': False, 'required': False}
+            'book_id': {'read_only': False, 'required': False},
+            'collections': {'required': False}
         }
     
     def create(self, user, validated_data):
@@ -33,6 +35,9 @@ class UserBookSerializer(ModelSerializer):
             
         book = self.create(user=instance, validated_data=validated_data)
         return book
+    
+    def get_collections_f(self, userbook):
+        return userbook.collections.values('title')
 
 
 class BookNoteListSerializer(ListSerializer):
