@@ -25,12 +25,14 @@ class UserDAL:
     @staticmethod
     def get_stat(user):
         books = UserBook.objects.filter(user=user)
+        schedule = get_schedule(user)
         if len(books) == 0:
             return {
             'per_day': 0,
             'per_month': 0,
             'per_year': 0,
-            'anytime': 0
+            'anytime': 0,
+            'schedule': schedule
         }
         time_per_day = books.annotate(time=F('finish_date')-F('start_date')).aggregate(Sum('time'), Count('time'), Sum('pages'))
         timedays = time_per_day.get('pages__sum') / (time_per_day.get('time__sum').days + time_per_day.get('time__count'))
@@ -41,61 +43,77 @@ class UserDAL:
             'per_day': int(timedays),
             'per_month': per_month,
             'per_year': per_year,
-            'anytime': books.count()
+            'anytime': books.count(),
+            'schedule': schedule 
         }
 
-        schedule = []
-
-        current_month = date_now.month
-        months = get_monthes(current_month, date_now.year)
-        for m_index, item in enumerate(months):
-
-            item_month = item[0]
-            item_year = item[1]
-
-            month_info = calendar.monthrange(item_year, item_month)
-
-            start_date = datetime.date(item_year, item_month, 1)
-            finish_date = datetime.date(item_year, item_month, month_info[1])
-
-            query_range = (start_date, finish_date)
-            q_start = Q(start_date__range=query_range)
-            q_finish = Q(finish_date__range=query_range)
-
-            filtered_books = books.filter(q_start | q_finish)
-                
-            active_days = set()
-            # print(filtered_books)
-
-            for book in filtered_books:
-                start = book.start_date
-                finish = book.finish_date
-
-                if finish > finish_date:
-                    finish = month_info[1]
-                    start = start.day
-                elif start < start_date:
-                    start = 1
-                    finish = finish.day
-                else:
-                    start = start.day
-                    finish = finish.day
-
-                for day in range(start, finish + 1):
-                    active_days.add(day)
-
-            schedule.append({
-                'month': m_index,
-                'offset': month_info[0],
-                'days': month_info[1],
-                'active_day': list(active_days)
-            })
-
-        all_times['schedule'] = schedule
             
         return all_times
     
-def get_monthes(cur, year):
+def get_schedule(user):
+    books = UserBook.objects.filter(user=user)
+    date_now = datetime.datetime.now()
+    schedule = []
+
+    current_month = date_now.month
+    months = _get_monthes(current_month, date_now.year)
+
+    for m_index, item in enumerate(months):
+        item_month, item_year = item[0], item[1]
+
+        month_info = calendar.monthrange(item_year, item_month)
+        start_date = datetime.date(item_year, item_month, 1)
+        finish_date = datetime.date(item_year, item_month, month_info[1])
+
+        filtered_books = _get_filtered_books(books, start_date, finish_date)
+        
+        active_days = _get_active_days(filtered_books, start_date, finish_date, month_info)
+
+        schedule.append({
+            'month': item_month,
+            'offset': month_info[0],
+            'days': month_info[1],
+            'active_day': list(active_days)
+        })
+
+    return schedule
+
+
+def _get_active_days(books, start_date, finish_date, month_info):
+    active_days = set()
+    for book in books:
+        start = book.start_date
+        finish = book.finish_date
+
+        if start < start_date and finish > finish_date:
+            print("WORKS")
+            return range(1, month_info[1] + 1)
+
+        if finish > finish_date:
+            finish = month_info[1]
+            start = start.day
+        elif start < start_date:
+            start = 1
+            finish = finish.day
+        else:
+            start = start.day
+            finish = finish.day
+
+        for day in range(start, finish + 1):
+            active_days.add(day)
+    return active_days
+
+
+def _get_filtered_books(books, start_date, finish_date):
+    query_range = (start_date, finish_date)
+    q_start = Q(start_date__range=query_range)
+    q_finish = Q(finish_date__range=query_range)
+
+    filtered_books = books.filter((q_start | q_finish) | Q(start_date__lte=start_date, finish_date__gte=finish_date))
+    return filtered_books
+
+def _get_monthes(cur, year):
+    
     res = []
     for x in range(5, -1, -1):
         m = cur - x
