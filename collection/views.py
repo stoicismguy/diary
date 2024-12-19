@@ -90,6 +90,24 @@ def add_book_to_collection(request, uuid):
     return Response(UserBookSerializer(book).data, status=200)
 
 
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+def remove_book_from_collection(request, uuid):
+    collection = get_collection_via_uuid(uuid)
+    if request.user != collection.user:
+        return Response({'detail': "No access to remove it"}, status=403)
+    book_id = request.data.get("book_id", None)
+    if book_id is None:
+        return Response({'detail': "Could not find a book with this uuid"})
+    book = get_book(book_id)
+    if book.user != request.user:
+        return Response({'detail': "You can change only YOUR books"})
+    
+    collection.books.remove(book)
+    collection.save()
+    return Response(UserBookSerializer(book).data, status=200)
+
+
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 def collection_info(request, uuid):

@@ -9,7 +9,9 @@ from .services import get_user_books, get_book, get_book_notes
 from userProfile.services import UserDAL
 
 from .serializers import UserBookSerializer, BookNoteSerializer
-
+from collection.serializers import CollectionSerializer
+from .models import UserBook
+from django.db.models import Q
 
 
 @api_view(['GET'])
@@ -44,9 +46,9 @@ def get_book_notes_view(request, book_uuid):
 @authentication_classes([TokenAuthentication])
 def get_book_info(request, uuid):
     book = get_book(uuid)
-    if book.user == request.user:
-        return Response(UserBookSerializer(book).data, status=200)
-    return Response({'detail': 'You have no access'}, status=403)
+    if book.private and book.user != request.user:
+        return Response({'detail': 'You have no access'}, status=403)
+    return Response(UserBookSerializer(book).data, status=200)
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -83,3 +85,21 @@ def delete_book(request, uuid):
         return Response(status=204)
     return Response({'detail': "No access to delete it"})
 
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+def get_book_collections(request, uuid):
+    book = get_book(uuid)
+    collections = book.collections.all()
+    return Response(CollectionSerializer(collections, many=True).data, status=200)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+def website_search(request):
+    search_value = request.GET.get("search", None)
+    if search_value is not None:
+        books = UserBook.objects.all().filter(Q(title__icontains=search_value) | Q(author__icontains=search_value)).order_by("created_at")
+    else:
+        books = UserBook.objects.all().order_by("created_at")
+    
+    return Response(UserBookSerializer(books, many=True).data, status=200)

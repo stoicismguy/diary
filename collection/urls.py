@@ -8,5 +8,6 @@ urlpatterns = [
     path('<slug:uuid>/delete', views.delete_collection, name='delete_colllection'),
     path('<slug:uuid>/set_privacy', views.change_collection_privacy, name='change_privacy'),
     path('<slug:uuid>/add_book', views.add_book_to_collection, name='add_book'),
+    path('<slug:uuid>/remove_book', views.remove_book_from_collection, name='remove_book'),
     path('<slug:uuid>', views.collection_info, name='collection_info'),
 ]

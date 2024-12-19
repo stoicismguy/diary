@@ -7,7 +7,14 @@ from rest_framework.authtoken.models import Token
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email']
+        fields = ['username', 'first_name', 'last_name', 'email', "bio"]
+
+        extra_kwargs = {
+            'username': {'read_only': True}
+        }
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
         
 
 class RegisterSerializer(ModelSerializer):

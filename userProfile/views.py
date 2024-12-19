@@ -10,7 +10,7 @@ from .serializers import UserSerializer, IssueTokenRequestSerializer, TokenSeria
 from .services import UserDAL
 
 
-@api_view()
+@api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 def user_info(request, username):
     user = UserDAL.get_user_by_username(username)
@@ -18,7 +18,7 @@ def user_info(request, username):
     return Response({"user": UserSerializer(user).data, "statistics": stat})
 
     
-@api_view()
+@api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 def user(request):
     return Response(UserSerializer(request.user).data)
@@ -48,4 +48,14 @@ def user_register(request):
         if user:
             token = Token.objects.create(user=user)
             return Response(TokenSerializer(token).data)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["PUT"])
+@authentication_classes([TokenAuthentication])
+def user_update(request):
+    serializer = UserSerializer(instance=request.user, data=request.data)
+    if serializer.is_valid():
+        serializer.update(request.user, serializer.validated_data)
+        return Response(UserSerializer(request.user).data)
     return Response(serializer.errors, status=400)

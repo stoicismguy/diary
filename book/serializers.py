@@ -3,13 +3,15 @@ from .models import UserBook, BookNote
 
 class UserBookSerializer(ModelSerializer):
     collections = SerializerMethodField('get_collections_f')
+    username = SerializerMethodField('get_username_f')
     class Meta:
         model = UserBook
-        fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private', 'collections']
+        fields = ['book_id', 'title', 'author', 'rating', 'pages', 'start_date', 'finish_date', 'retelling', 'private', 'collections', 'username']
         extra_kwargs = {
             # 'private': {'write_only': True},
             'book_id': {'read_only': False, 'required': False},
-            'collections': {'required': False}
+            'collections': {'required': False},
+            'username': {'required': False},
         }
     
     def create(self, user, validated_data):
@@ -38,6 +40,9 @@ class UserBookSerializer(ModelSerializer):
     
     def get_collections_f(self, userbook):
         return userbook.collections.values('title')
+    
+    def get_username_f(self, userbook):
+        return userbook.user.username
 
 
 class BookNoteListSerializer(ListSerializer):
