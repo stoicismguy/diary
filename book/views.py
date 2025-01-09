@@ -98,8 +98,16 @@ def get_book_collections(request, uuid):
 def website_search(request):
     search_value = request.GET.get("search", None)
     if search_value is not None:
-        books = UserBook.objects.all().filter(Q(title__icontains=search_value) | Q(author__icontains=search_value)).order_by("created_at")
+        books = UserBook.objects.filter(private=False).filter(Q(title__icontains=search_value) | Q(author__icontains=search_value)).order_by("created_at")
     else:
-        books = UserBook.objects.all().order_by("created_at")
+        books = UserBook.objects.filter(private=False).order_by("created_at")
     
     return Response(UserBookSerializer(books, many=True).data, status=200)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+def get_two_last(request):
+    books = UserBook.objects.filter(private=False).order_by("-created_at")[:2]
+    return Response(UserBookSerializer(books, many=True).data, status=200)
+

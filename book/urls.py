@@ -10,4 +10,5 @@ urlpatterns = [
     path('<slug:book_uuid>/notes/add', views.add_book_note, name='add_book_note'),
     path('<slug:uuid>/delete', views.delete_book, name='delete_book'),
     path('create_or_update/', views.add_book_view, name='add_book_view'),
+    path('get_two_last/', views.get_two_last, name='get_two_last'),
 ]
