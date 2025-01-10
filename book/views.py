@@ -15,7 +15,6 @@ from django.db.models import Q
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
 def get_user_books_view(request, username):
     if str(request.user.username) == username:
         books = get_user_books(request.user, private=True)
@@ -27,7 +26,6 @@ def get_user_books_view(request, username):
     book_owner = UserDAL.get_user_by_username(username)
     books = get_user_books(book_owner)
     return Response(UserBookSerializer(books, many=True).data)
-
 
 
 @api_view(['GET'])
