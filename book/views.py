@@ -15,6 +15,7 @@ from django.db.models import Q
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_user_books_view(request, username):
     if str(request.user.username) == username:
         books = get_user_books(request.user, private=True)
@@ -29,6 +30,7 @@ def get_user_books_view(request, username):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_book_notes_view(request, book_uuid):
     book = get_book(book_uuid)
     if str(request.user.id) == str(book.user.id):
@@ -40,6 +42,7 @@ def get_book_notes_view(request, book_uuid):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_book_info(request, uuid):
     book = get_book(uuid)
     if book.private and book.user != request.user:
@@ -90,6 +93,7 @@ def get_book_collections(request, uuid):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def website_search(request):
     search_value = request.GET.get("search", None)
     if search_value is not None:
@@ -101,6 +105,7 @@ def website_search(request):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_two_last(request):
     books = UserBook.objects.filter(private=False).order_by("-created_at")[:2]
     return Response(UserBookSerializer(books, many=True).data, status=200)
