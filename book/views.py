@@ -19,13 +19,14 @@ from django.db.models import Q
 def get_user_books_view(request, username):
     if str(request.user.username) == username:
         books = get_user_books(request.user, private=True)
-        search_value = request.GET.get("search", None)
-        if search_value is not None:
-            books = books.filter(title__icontains=search_value)
-        return Response(UserBookSerializer(books, many=True).data)
-    
-    book_owner = UserDAL.get_user_by_username(username)
-    books = get_user_books(book_owner)
+    else:
+        book_owner = UserDAL.get_user_by_username(username)
+        books = get_user_books(book_owner)
+
+    search_value = request.GET.get("search", None)
+    if search_value is not None:
+        books = books.filter(title__icontains=search_value)
+
     return Response(UserBookSerializer(books, many=True).data)
 
 
